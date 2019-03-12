@@ -1,0 +1,74 @@
+/*
+Package main.go
+App: pwned
+Queries the haveibeenpwned.com API for breached passwords.
+The entered password is hashed with SHA1. The first five chars of the
+hash are sent to the API which returns the hashes of all the passwords
+whose first five chars match, along with a count of how many occurrences
+of that password are in the database. (The returned hashes are missing
+the first five chars because we already know those.)
+The program then cycles through the returned hashes looking for that
+created by our password.
+
+Offered up under GPL 3.0 but absolutely not guaranteed fit for use.
+This is code created by hobbyist coder, so use at your own risk.
+Github: https://github.com/mspeculatrix
+Blog: https://mansfield-devine.com/speculatrix/
+*/
+
+package main
+
+import (
+	"bufio"
+	"crypto/sha1"
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
+)
+
+/******************************************************************************
+ *****   MAIN                                                             *****
+ ******************************************************************************/
+func main() {
+	if len(os.Args) != 2 {
+		fmt.Println("Wrong number of arguments. Usage: pwned <password>")
+		os.Exit(1)
+	}
+	const urlStem = "https://api.pwnedpasswords.com/range/"
+	pw := os.Args[1]
+	hash := sha1.New()
+	hash.Write([]byte(pw))
+	hashStr := fmt.Sprintf("%x", hash.Sum(nil))
+
+	prefix := strings.ToUpper(hashStr[0:5])
+	remainder := strings.ToUpper(hashStr[5:])
+	fullURL := urlStem + prefix
+
+	resp, err := http.Get(fullURL)
+	if err != nil {
+		fmt.Println("Error contacting API.")
+		os.Exit(2)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		fmt.Printf("Bad response from server: %s", resp.Status)
+		os.Exit(3)
+	}
+
+	matched := false
+	scanner := bufio.NewScanner(resp.Body) // to read line-by-line
+	for scanner.Scan() {                   // iterate over lines in file
+		// Not sure if the TrimSpace() is necessary, but let's be cautious.
+		line := strings.TrimSpace(scanner.Text()) // get next line
+		items := strings.Split(line, ":")
+		if items[0] == remainder {
+			matched = true
+			fmt.Printf("%s found in database - %s times\n", pw, items[1])
+		}
+	}
+	if !matched {
+		fmt.Printf("No match found for %s\n", pw)
+	}
+}
