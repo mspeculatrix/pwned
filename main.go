@@ -36,16 +36,16 @@ func main() {
 		os.Exit(1)
 	}
 	const urlStem = "https://api.pwnedpasswords.com/range/"
-	pw := os.Args[1]
-	hash := sha1.New()
-	hash.Write([]byte(pw))
-	hashStr := fmt.Sprintf("%x", hash.Sum(nil))
+	pw := os.Args[1]                            // grab the entered password
+	hash := sha1.New()                          // create new SHA1 hash
+	hash.Write([]byte(pw))                      // run our password through it
+	hashStr := fmt.Sprintf("%x", hash.Sum(nil)) // make a string of it
 
-	prefix := strings.ToUpper(hashStr[0:5])
-	remainder := strings.ToUpper(hashStr[5:])
-	fullURL := urlStem + prefix
+	prefix := strings.ToUpper(hashStr[0:5])   // prefix is what we're going to send
+	remainder := strings.ToUpper(hashStr[5:]) // this is needed for matching later
+	fullURL := urlStem + prefix               // the URL for the API query
 
-	resp, err := http.Get(fullURL)
+	resp, err := http.Get(fullURL) // make a GET request to the API
 	if err != nil {
 		fmt.Println("Error contacting API.")
 		os.Exit(2)
@@ -59,11 +59,10 @@ func main() {
 
 	matched := false
 	scanner := bufio.NewScanner(resp.Body) // to read line-by-line
-	for scanner.Scan() {                   // iterate over lines in file
-		// Not sure if the TrimSpace() is necessary, but let's be cautious.
+	for scanner.Scan() {                   // iterate over lines in response
 		line := strings.TrimSpace(scanner.Text()) // get next line
-		items := strings.Split(line, ":")
-		if items[0] == remainder {
+		items := strings.Split(line, ":")         // separate hash and count
+		if items[0] == remainder {                // compare returned hash with ours
 			matched = true
 			fmt.Printf("%s found in database - %s times\n", pw, items[1])
 		}
