@@ -1,5 +1,5 @@
 /*
-Package main.go
+Package pwned.go
 App: pwned
 Queries the haveibeenpwned.com API for breached passwords.
 The entered password is hashed with SHA1. The first five chars of the
@@ -16,7 +16,7 @@ Github: https://github.com/mspeculatrix
 Blog: https://mansfield-devine.com/speculatrix/
 */
 
-package main
+package pwned
 
 import (
 	"bufio"
@@ -64,10 +64,10 @@ func main() {
 		items := strings.Split(line, ":")         // separate hash and count
 		if items[0] == remainder {                // compare returned hash with ours
 			matched = true
-			fmt.Printf("%s found in database - %s times\n", pw, items[1])
+			fmt.Printf("pwned! %s found in database - %s times\n", pw, items[1])
 		}
 	}
 	if !matched {
-		fmt.Printf("No match found for %s\n", pw)
+		fmt.Printf("No match for %s\n", pw)
 	}
 }
