@@ -1,5 +1,5 @@
 /*
-Package pwned.go
+Package main
 App: pwned
 Queries the haveibeenpwned.com API for breached passwords.
 The entered password is hashed with SHA1. The first five chars of the
@@ -16,7 +16,7 @@ Github: https://github.com/mspeculatrix
 Blog: https://mansfield-devine.com/speculatrix/
 */
 
-package pwned
+package main
 
 import (
 	"bufio"
