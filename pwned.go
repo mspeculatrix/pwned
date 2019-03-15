@@ -58,7 +58,7 @@ func main() {
 	}
 
 	matched := false
-	scanner := bufio.NewScanner(resp.Body) // to read line-by-line
+	scanner := bufio.NewScanner(resp.Body) // to read response line-by-line
 	for scanner.Scan() {                   // iterate over lines in response
 		line := strings.TrimSpace(scanner.Text()) // get next line
 		items := strings.Split(line, ":")         // separate hash and count
